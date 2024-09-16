@@ -1,0 +1,86 @@
+-- Aula 16-09-2024
+CREATE DATABASE loja;
+
+CREATE TABLE cliente(
+	cliente_id int unsigned auto_increment primary key,
+    nome varchar(100) not null, 
+    email varchar(50) not null unique,
+    endereco varchar(100) not null,
+    data_nascimento date not null check (data_nascimento > '1900-01-01'),
+    status enum('ativo', 'inativo') not null default 'ativo'
+);
+
+CREATE TABLE pedido(
+	pedido_id int unsigned auto_increment primary key,
+    cliente_id int unsigned not null, 
+    data_pedido date not null check (data_pedido > '1900-01-01'),
+    valor_total decimal(10,2) not null default 0,
+	status enum('pendente', 'processado', 'enviado', 'entregue') not null default 'pendente',
+    foreign key (cliente_id) references cliente (cliente_id) on delete cascade,
+    index (cliente_id)
+);
+
+INSERT INTO cliente (nome, email, endereco, data_nascimento, status)
+VALUES 
+	('João Silva', 'joao.silva@email.com', 'Rua A', '1985-06-15', 'ativo'),
+	('Maria Oliveira', 'maria.oliveira@email.com', 'Rua B', '1990-12-22', 'ativo'),
+	('Carlos Souza', 'carlos.souza@email.com', 'Rua C', '1978-03-30', 'inativo');
+    
+INSERT INTO pedido (cliente_id, data_pedido, valor_total, status)
+VALUES
+    (1, '2024-09-10', 150.75, 'processado'),
+    (2, '2024-09-11', 299.99, 'enviado'),
+    (3, '2024-09-12', 50.00, 'pendente');
+    
+-- CONSULTAS
+SELECT * FROM cliente;
+
+SELECT * FROM pedido
+WHERE cliente_id = 1;
+
+SELECT * FROM CLIENTE
+WHERE status = 'ativo';
+
+SELECT 
+	p.pedido_id, p.data_pedido, p.valor_total, p.status,
+    c.nome, c.email
+FROM pedido as p
+INNER JOIN cliente as c ON c.cliente_id = p.pedido_id
+WHERE data_pedido between '2024-09-10' and '2024-09-12'; 
+
+SELECT c.nome, p.valor_total FROM cliente as c
+INNER JOIN pedido as p ON c.cliente_id = p.pedido_id
+WHERE valor_total > 200;
+
+SELECT * FROM PEDIDO
+ORDER BY data_pedido desc
+LIMIT 3;
+
+SELECT
+	c.nome,
+    c.email,
+    p.*
+FROM cliente as c
+INNER JOIN pedido as p ON c.cliente_id = p.pedido_id;
+
+SELECT
+	c.nome,
+    c.email
+FROM cliente as c
+INNER JOIN pedido as p ON c.cliente_id = p.pedido_id
+WHERE p.status = 'enviado';
+
+update cliente
+set status = 'ativo'
+where cliente_id = 3; 
+
+update pedido
+set status = 'enviado'
+where cliente_id = 3; 
+
+delete from cliente
+where cliente_id = 1;
+
+
+
+
